@@ -2,9 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Оплата | База Арсена Маркаряна</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оплата Доступа</title>
   <style>
-    /* Стили, чтобы было похоже на ваши скриншоты (чёрный фон, белый текст) */
+    /* Адаптивные стили */
     body {
       margin: 0;
       padding: 0;
@@ -14,23 +15,25 @@
     }
     .container {
       max-width: 400px;
+      width: 90%;
       margin: 0 auto;
       padding: 16px;
     }
     h1, h2, p, label {
       color: #fff;
     }
-
-    /* Стили "прогресс-бара" */
+    /* Индикатор шагов */
     .step-indicator {
       display: flex;
       justify-content: space-around;
       margin-bottom: 20px;
+      flex-wrap: wrap; /* перенос элементов на маленьких экранах */
     }
     .step {
       display: flex;
       flex-direction: column;
       align-items: center;
+      margin: 5px;
     }
     .step-circle {
       width: 24px;
@@ -54,15 +57,13 @@
     .step.active .step-label {
       opacity: 1;
     }
-
-    /* Контейнер шагов */
+    /* Контент шагов */
     .step-content {
       display: none;
     }
     .step-content.active {
       display: block;
     }
-
     .input-field {
       background-color: #222;
       border: 1px solid #444;
@@ -70,10 +71,12 @@
       padding: 8px;
       width: 100%;
       margin-bottom: 12px;
+      box-sizing: border-box;
     }
     .radio-group {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
     }
     .radio-btn {
       flex: 1;
@@ -86,7 +89,6 @@
     .radio-btn.selected {
       background-color: #666;
     }
-
     .button {
       display: inline-block;
       background-color: #333;
@@ -107,8 +109,7 @@
       text-align: center;
       margin-top: 20px;
     }
-
-    /* Карточка подтверждения (шаг 2) */
+    /* Карточка подтверждения */
     .summary-box {
       background-color: #222;
       padding: 16px;
@@ -120,14 +121,11 @@
     .summary-label {
       font-weight: bold;
     }
-
-    /* Мобильный вид: центрирование */
     @media (max-width: 480px) {
       .container {
         padding: 8px;
       }
     }
-
   </style>
 </head>
 <body>
@@ -151,7 +149,7 @@
     <!-- ШАГ 1: ВЫБОР -->
     <div class="step-content active" data-step="1">
       <h2>Наименование товара</h2>
-      <p>База Арсена Маркаряна / 1 мес.</p>
+      <p>База Доступ</p>
 
       <h3>Метод оплаты</h3>
       <div class="radio-group" id="paymentMethodGroup">
@@ -161,6 +159,10 @@
 
       <label for="emailInput">Ваш E-mail</label>
       <input type="email" id="emailInput" class="input-field" placeholder="example@gmail.com" />
+      <!-- Сообщение об ошибке -->
+      <div id="emailError" style="color: #ff6666; margin-bottom: 12px; display: none;">
+        Пожалуйста, введите ваш E-mail.
+      </div>
 
       <div id="priceContainer">
         <p>Стоимость: <span id="priceLabel">1500 RUB</span></p>
@@ -206,13 +208,11 @@
   </div>
 
   <script>
-    // Товар по умолчанию
-    let productName = "База Арсена Маркаряна / 1 мес.";
+    let productName = "База Доступ";
     let paymentMethod = "Банк РФ";
     let userEmail = "";
-    let price = "1500 RUB"; // или 17.1 USD — при необходимости сделайте выбор
+    let price = "1500 RUB";
 
-    // Логика переключения "радио-кнопок"
     const radioBtns = document.querySelectorAll('.radio-btn');
     radioBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -222,54 +222,46 @@
       });
     });
 
-    // Переход на шаг 2
+    // Очистка сообщения об ошибке при вводе
+    document.getElementById('emailInput').addEventListener('input', () => {
+      document.getElementById('emailError').style.display = 'none';
+    });
+
     function goToStep2() {
       userEmail = document.getElementById('emailInput').value.trim();
-
-      // Обновляем сводку
+      if (!userEmail) {
+        document.getElementById('emailError').style.display = 'block';
+        return;
+      }
       document.getElementById('summaryName').textContent = productName;
       document.getElementById('summaryMethod').textContent = paymentMethod;
-      document.getElementById('summaryEmail').textContent = userEmail || "не указано";
+      document.getElementById('summaryEmail').textContent = userEmail;
       document.getElementById('summaryPrice').textContent = price;
 
       setActiveStep(2);
     }
 
-    // Вернуться на шаг 1
     function returnToStep1() {
       setActiveStep(1);
     }
 
-    // Переход к шагу 3 (и генерация ссылки на оплату)
     function goToPayment() {
-      // Здесь сгенерируете ссылку на Lava
-      // Допустим, вы берёте productId из своего кабинета Lava:
-      // Пример (фиктивный): "e3dc5b9b-d511-4b79-9457-edfb40a45cc5"
       let productId = "e3dc5b9b-d511-4b79-9457-edfb40a45cc5";
-      // paymentParams и т.д. — смотрите документацию Lava
-      // Для примера вставляем длинную ссылку, как на скриншоте
-      let lavaUrl = `https://app.lava.top/products/${productId}?paymentParams=...`; 
-
-      // Устанавливаем href кнопке
+      let lavaUrl = `https://app.lava.top/products/${productId}?paymentParams=...`;
       document.getElementById('finalPayLink').href = lavaUrl;
-
       setActiveStep(3);
-
-      // Автоматический переход через 2 секунды, например
       setTimeout(() => {
         window.open(lavaUrl, "_blank");
       }, 2000);
     }
 
     function setActiveStep(stepNumber) {
-      // Обновляем индикатор шагов
       document.querySelectorAll('.step').forEach(st => {
         st.classList.remove('active');
         if (parseInt(st.getAttribute('data-step')) === stepNumber) {
           st.classList.add('active');
         }
       });
-      // Показываем нужный контент
       document.querySelectorAll('.step-content').forEach(cont => {
         cont.classList.remove('active');
         if (parseInt(cont.getAttribute('data-step')) === stepNumber) {
