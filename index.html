@@ -1,22 +1,282 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Оплата подписки</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .info { background: #f5f5f5; padding: 10px; margin: 10px 0; border-left: 3px solid #ccc; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Оплата | База Арсена Маркаряна</title>
+  <style>
+    /* Стили, чтобы было похоже на ваши скриншоты (чёрный фон, белый текст) */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    h1, h2, p, label {
+      color: #fff;
+    }
+
+    /* Стили "прогресс-бара" */
+    .step-indicator {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .step-circle {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step.active .step-circle {
+      background-color: #fff;
+      color: #111;
+      font-weight: bold;
+    }
+    .step-label {
+      margin-top: 5px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+    .step.active .step-label {
+      opacity: 1;
+    }
+
+    /* Контейнер шагов */
+    .step-content {
+      display: none;
+    }
+    .step-content.active {
+      display: block;
+    }
+
+    .input-field {
+      background-color: #222;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 8px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .radio-group {
+      display: flex;
+      gap: 8px;
+    }
+    .radio-btn {
+      flex: 1;
+      text-align: center;
+      background-color: #222;
+      padding: 10px;
+      border: 1px solid #444;
+      cursor: pointer;
+    }
+    .radio-btn.selected {
+      background-color: #666;
+    }
+
+    .button {
+      display: inline-block;
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-right: 10px;
+      cursor: pointer;
+      border: 1px solid #555;
+    }
+    .button:hover {
+      background-color: #555;
+    }
+    .button-block {
+      width: 100%;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* Карточка подтверждения (шаг 2) */
+    .summary-box {
+      background-color: #222;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .summary-item {
+      margin-bottom: 8px;
+    }
+    .summary-label {
+      font-weight: bold;
+    }
+
+    /* Мобильный вид: центрирование */
+    @media (max-width: 480px) {
+      .container {
+        padding: 8px;
+      }
+    }
+
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>Оплата подписки</h1>
-    <p>Добро пожаловать. Здесь могла быть ваша страница оплаты.</p>
-
-    <div class="info">
-        <p>В реальном проекте здесь вы показываете форму оплаты, интеграцию с Lava и т.д.</p>
+  <div class="container">
+    <!-- ИНДИКАТОР ШАГОВ -->
+    <div class="step-indicator">
+      <div class="step active" data-step="1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Выбор</div>
+      </div>
+      <div class="step" data-step="2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Данные</div>
+      </div>
+      <div class="step" data-step="3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Оплата</div>
+      </div>
     </div>
-</div>
+
+    <!-- ШАГ 1: ВЫБОР -->
+    <div class="step-content active" data-step="1">
+      <h2>Наименование товара</h2>
+      <p>База Арсена Маркаряна / 1 мес.</p>
+
+      <h3>Метод оплаты</h3>
+      <div class="radio-group" id="paymentMethodGroup">
+        <div class="radio-btn selected" data-value="Банк РФ">Банк РФ</div>
+        <div class="radio-btn" data-value="Иностранный банк">Иностранный банк</div>
+      </div>
+
+      <label for="emailInput">Ваш E-mail</label>
+      <input type="email" id="emailInput" class="input-field" placeholder="example@gmail.com" />
+
+      <div id="priceContainer">
+        <p>Стоимость: <span id="priceLabel">1500 RUB</span></p>
+      </div>
+
+      <div class="button-block">
+        <span class="button" onclick="goToStep2()">Далее</span>
+      </div>
+    </div>
+
+    <!-- ШАГ 2: ДАННЫЕ -->
+    <div class="step-content" data-step="2">
+      <h2>Убедитесь, что введённые данные верны</h2>
+      <div class="summary-box">
+        <div class="summary-item">
+          <span class="summary-label">Наименование товара:</span> <span id="summaryName"></span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Метод оплаты:</span> <span id="summaryMethod"></span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Ваш E-mail:</span> <span id="summaryEmail"></span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Стоимость:</span> <span id="summaryPrice"></span>
+        </div>
+      </div>
+      <div class="button-block">
+        <span class="button" onclick="goToPayment()">Перейти к оплате</span>
+        <span class="button" onclick="returnToStep1()">Вернуться назад</span>
+      </div>
+    </div>
+
+    <!-- ШАГ 3: ОПЛАТА -->
+    <div class="step-content" data-step="3">
+      <h2>Оплата</h2>
+      <p>Сейчас вы будете перенаправлены на страницу оплаты Lava...</p>
+      <p>Если ничего не произошло, нажмите кнопку ниже:</p>
+      <div class="button-block">
+        <a class="button" id="finalPayLink" href="#" target="_blank">Открыть ссылку</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Товар по умолчанию
+    let productName = "База Арсена Маркаряна / 1 мес.";
+    let paymentMethod = "Банк РФ";
+    let userEmail = "";
+    let price = "1500 RUB"; // или 17.1 USD — при необходимости сделайте выбор
+
+    // Логика переключения "радио-кнопок"
+    const radioBtns = document.querySelectorAll('.radio-btn');
+    radioBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        radioBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        paymentMethod = btn.getAttribute('data-value');
+      });
+    });
+
+    // Переход на шаг 2
+    function goToStep2() {
+      userEmail = document.getElementById('emailInput').value.trim();
+
+      // Обновляем сводку
+      document.getElementById('summaryName').textContent = productName;
+      document.getElementById('summaryMethod').textContent = paymentMethod;
+      document.getElementById('summaryEmail').textContent = userEmail || "не указано";
+      document.getElementById('summaryPrice').textContent = price;
+
+      setActiveStep(2);
+    }
+
+    // Вернуться на шаг 1
+    function returnToStep1() {
+      setActiveStep(1);
+    }
+
+    // Переход к шагу 3 (и генерация ссылки на оплату)
+    function goToPayment() {
+      // Здесь сгенерируете ссылку на Lava
+      // Допустим, вы берёте productId из своего кабинета Lava:
+      // Пример (фиктивный): "e3dc5b9b-d511-4b79-9457-edfb40a45cc5"
+      let productId = "e3dc5b9b-d511-4b79-9457-edfb40a45cc5";
+      // paymentParams и т.д. — смотрите документацию Lava
+      // Для примера вставляем длинную ссылку, как на скриншоте
+      let lavaUrl = `https://app.lava.top/products/${productId}?paymentParams=...`; 
+
+      // Устанавливаем href кнопке
+      document.getElementById('finalPayLink').href = lavaUrl;
+
+      setActiveStep(3);
+
+      // Автоматический переход через 2 секунды, например
+      setTimeout(() => {
+        window.open(lavaUrl, "_blank");
+      }, 2000);
+    }
+
+    function setActiveStep(stepNumber) {
+      // Обновляем индикатор шагов
+      document.querySelectorAll('.step').forEach(st => {
+        st.classList.remove('active');
+        if (parseInt(st.getAttribute('data-step')) === stepNumber) {
+          st.classList.add('active');
+        }
+      });
+      // Показываем нужный контент
+      document.querySelectorAll('.step-content').forEach(cont => {
+        cont.classList.remove('active');
+        if (parseInt(cont.getAttribute('data-step')) === stepNumber) {
+          cont.classList.add('active');
+        }
+      });
+    }
+  </script>
 </body>
 </html>
